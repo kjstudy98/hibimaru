@@ -1,37 +1,41 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import AddItemCard from "@/components/AddItemCard";
 import ItemsCard from "@/components/ItemsCard";
-import { useItems } from "@/hooks/useItems";
+
+interface Item {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
 
 const Home = () => {
-  const { items, loading, error, addItem, deleteItem, toggleItem } = useItems();
+  const [items, setItems] = useState<Item[]>([
+    { id: "1", name: "しょうゆ", isActive: true },
+    { id: "2", name: "サラダ油", isActive: false },
+  ]);
 
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-2">ホーム</h1>
-          <p>読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleAddItem = (itemName: string) => {
+    const newItem: Item = {
+      id: Date.now().toString(),
+      name: itemName,
+      isActive: true,
+    };
+    setItems([...items, newItem]);
+  };
 
-  if (error) {
-    return (
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-2">ホーム</h1>
-          <p className="text-red-600">エラー: {error}</p>
-          <p className="text-sm text-gray-600 mt-2">
-            データベース接続を確認してください
-          </p>
-        </div>
-      </div>
+  const handleDeleteItem = (id: string) => {
+    setItems(items.filter((item) => item.id !== id));
+  };
+
+  const handleToggleItem = (id: string) => {
+    setItems(
+      items.map((item) =>
+        item.id === id ? { ...item, isActive: !item.isActive } : item
+      )
     );
-  }
+  };
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -39,9 +43,13 @@ const Home = () => {
         <h1 className="text-3xl font-bold mb-2">ホーム</h1>
       </div>
 
-      <AddItemCard onAddItem={addItem} />
+      <AddItemCard onAddItem={handleAddItem} />
 
-      <ItemsCard items={items} onToggle={toggleItem} onDelete={deleteItem} />
+      <ItemsCard
+        items={items}
+        onToggle={handleToggleItem}
+        onDelete={handleDeleteItem}
+      />
     </div>
   );
 };
